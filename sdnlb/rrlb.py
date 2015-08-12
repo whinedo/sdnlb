@@ -5,12 +5,13 @@ from pyretic.modules.mac_learner import mac_learner
 from pyretic.lib.query import *
 
 class rrlb(DynamicPolicy):
-	def __init__(self, switch, ips, macs):
+	def __init__(self, switch, ips, macs,ports):
 		super(rrlb, self).__init__()
 		print "rrln creation!"
 		self.switch = switch
 		self.ips = ips
 		self.macs = macs
+		self.ports = ports
 		self.ip = self.ips[0]
 		self.mac = self.macs[0]
 		self.client = 0
@@ -23,8 +24,9 @@ class rrlb(DynamicPolicy):
 		print str(pkt)
 		print str(pkt['switch'])
 		print str(pkt['ethtype'])+" .. "+str(self.ip)
-		#
 		dst_01 = match(srcip=pkt['srcip'], dstip=IPAddr('10.0.0.2'))
+
+
 		flag = True
 		for i in self.ips:
 			if flag:
@@ -51,7 +53,10 @@ def main():
 	ips = [IPAddr('10.0.0.3'),IPAddr('10.0.0.4')]
 	#macs = [EthAddr("00:00:00:00:00:01"),EthAddr("00:00:00:00:00:02"),EthAddr("00:00:00:00:00:03")]
 	macs = [EthAddr("00:00:00:00:00:03"),EthAddr("00:00:00:00:00:04")]
-	rrlb_on_switch = rrlb(2,ips,macs)
+	ports = [10000,11000]
+
+	rrlb_on_switch = rrlb(2,ips,macs,ports)
+
 	forwardARP = match(ethtype=0x0806)
 	forwardICMP = match(ethtype=0x0800,protocol=1)
 	return if_(forwardICMP | forwardARP, mac_learner(), \

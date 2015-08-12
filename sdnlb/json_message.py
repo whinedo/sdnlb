@@ -7,20 +7,20 @@ eventTypes = {'status': 0,
 class JsonMessage (object):
 
 	@staticmethod
-	def genStatusMessage(status,status):
+	def genStatusMessage(status):
 		eventnum = eventTypes['status']
 
 		data = dict(event=dict(event_type=eventnum,    \
 		                       description=1,   \
 		                       data=dict(data_type='int',     \
 		                                 value=status          \
-		                       ))
+		                       )))
 
 
 		return json.dumps(data)
 		 
 	@staticmethod
-	def genLoadMessage(ip,cpuLoad,connections):
+	def genLoadMessage(cpuLoad,connections):
 		eventnum = eventTypes['load']
 
 		data = dict(event=dict(event_type=eventnum,    \
@@ -28,7 +28,7 @@ class JsonMessage (object):
 		                       data=dict(data_type='int',     \
 	                      	               value=dict(cpu=cpuLoad,
 			      	  		     conns=connections
-			      	  		     )),         \
+			      	  		     ))         \
 		              	         ))
 
 		return json.dumps(data)

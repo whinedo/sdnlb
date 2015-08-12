@@ -14,7 +14,7 @@ class Service:
 
 		elif (index < 0):
 			return None
-		else
+		else:
 		 	return self.servers[index]
 
 	def getLbPort(self):

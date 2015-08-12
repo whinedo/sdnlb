@@ -8,8 +8,8 @@ class Parser:
 	def __init__(self,configFile):
 		self.configFile = configFile
 		self.commentRe = re.compile ('#+.*')
-		self.weightRe = re.compile('(\d+) ([\w\.]+) (\d+) (\d+) (\d+)')
-		self.dynRe = re.compile('(\d+) (\w+) (\d+) (\d+)')
+		self.weightRe = re.compile('(\d+) ([\w\.]+) (\d\d:\d\d:\d\d:\d\d:\d\d:\d\d) (\d+) (\d+) (\d+)')
+		self.dynRe = re.compile('(\d+) (\w+) (\w+) (\d+) (\d+)')
 
 
 	def parse(self):
@@ -33,6 +33,7 @@ class Parser:
 
 			lbPort = None
 			ip = None
+			mac = None
 			port = None
 			weight = None
 			eventport = None
@@ -43,18 +44,20 @@ class Parser:
 
 			if (weightReRes != None):
 				print line
-				lbPort = weightReRes.group(1)	
+				lbPort = int(weightReRes.group(1))
 				ip = weightReRes.group(2)	
-				port = weightReRes.group(3)	
-				eventPort = weightReRes.group(4)	
-				weight = weightReRes.group(5)	
+				mac = weightReRes.group(3)
+				port = weightReRes.group(4)	
+				eventPort = int(weightReRes.group(5))
+				weight = weightReRes.group(6)	
 
 			elif (dynReRes != None):
 				print line
-				lbPort = dynReRes.group(1)	
+				lbPort = int(dynReRes.group(1))
 				ip = dynReRes.group(2)	
-				port = dynReRes.group(3)	
-				eventPort = dynReRes.group(4)	
+				mac = weightReRes.group(3)
+				port = int(dynReRes.group(4))
+				eventPort = dynReRes.group(5)	
 
 			else:
 				continue
@@ -64,11 +67,11 @@ class Parser:
 			if (index == -1):
 				#new service
 				service = Service(lbPort)
+				services.addService(service)
 			else:
 				service = services.getService(index)
 
-			services.addService(service)
-			service.addServer(Server(ip,port,status,eventPort,weight))
+			service.addServer(Server(ip,mac,port,status,eventPort,weight))
 
 			#DEBUG
 			print service

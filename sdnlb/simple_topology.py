@@ -10,6 +10,8 @@ from mininet.log import setLogLevel, info
 from mininet.link import TCLink, Intf
 from subprocess import call
 
+import sdnlb_conf
+
 def myNetwork():
 
     net = Mininet( topo=None,
@@ -52,7 +54,9 @@ def myNetwork():
     net.get('s2').start([c0])
 
     info( '*** Post configure switches and hosts\n')
-    s2.cmd('ifconfig s2 10.0.0.100')
+
+    sip = sdnlb_conf.switch_ip
+    s2.cmd('ifconfig s2 %s'%(sip))
 
     CLI(net)
     net.stop()

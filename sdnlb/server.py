@@ -1,8 +1,9 @@
 class Server (object):
 	
-	def __init__(self,ip,port,status,eventPort,weight):
+	def __init__(self,ip,mac,port,status,eventPort,weight):
 		self.ip = ip
-		self.port = port
+		self.mac = mac
+		self.port = int(port)
 		self.eventPort = eventPort
 		self.status = status
 		self.weight = weight
@@ -15,6 +16,12 @@ class Server (object):
 
 	def setIp(self,ip):
 		self.ip = ip
+
+	def getMac(self):
+		return self.mac
+
+	def setMac(self,mac):
+		self.mac = mac
 
 	
 	def getPort(self):
