@@ -25,8 +25,9 @@ class Service (object):
 		 	self.servers[index] = server
 
 		print "index",index
-		print self.servers[index]
+		print self.servers[index].printAll()
 		print self.servers[index].getStatus()
+                
 	
 	def getLastSrv(self):
 		return self.last_srv
