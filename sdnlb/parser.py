@@ -73,8 +73,4 @@ class Parser:
 
 			service.addServer(Server(ip,mac,port,status,eventPort,weight))
 
-			#DEBUG
-			print service
-			#FINDEBUG
-
 		return services

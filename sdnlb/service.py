@@ -20,12 +20,11 @@ class Service (object):
 		 	return self.servers[index]
 
 	def setServer(self,index,server):
-		print "SET SERVER //////"
-		print server
 		
-		if (index < (len(self.servers)) and index > 0):
+		if (index < (len(self.servers)) and index >= 0):
 		 	self.servers[index] = server
 
+		print "index",index
 		print self.servers[index]
 		print self.servers[index].getStatus()
 	

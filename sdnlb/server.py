@@ -4,12 +4,18 @@ class Server (object):
 		self.ip = ip
 		self.mac = mac
 		self.port = int(port)
-		self.eventPort = eventPort
+		self.eventPort = int(eventPort)
 		self.status = status
-		self.weight = weight
+		self.weight = int(weight)
 		self.connections = -1
 		self.cpu = -1
 
+
+	def printAll(self):
+
+		l = "IP:%s, MAC:%s, Port:%d, EventPort:%d, Status:%s, Weight:%d,Connections:%d,CPU:%d"%(self.ip,self.mac,self.port,self.eventPort,self.status,self.weight,self.connections,self.cpu)
+
+		print l
 
 	def getIp(self):
 		return self.ip

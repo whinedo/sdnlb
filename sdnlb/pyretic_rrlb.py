@@ -162,14 +162,12 @@ def staticFilterTcp():
 	return if_(match(ethtype=packet.IPV4, protocol=packet.TCP_PROTO),genDynRules(),mac_learner())
 
 def setup_services():
-	parser = Parser('/home/mininet/sdnlb/sdnlb/servers.conf')
+	parser = Parser('servers.conf')
 	services = parser.parse()
 	return services
     
 def main():
 
-	parser = Parser('/home/mininet/sdnlb/sdnlb/servers.conf')
-	services = parser.parse()
 
 	rrlb_sdn = RRlb(sdnlb_conf.switch,sdnlb_conf.sip)
 

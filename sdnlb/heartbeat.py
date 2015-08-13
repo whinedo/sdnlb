@@ -50,14 +50,13 @@ class HeartBeat (object):
 					socket.close()
 
 				self.services.setServer(lbPort,index,server)
-			index += 1
+				index += 1
 
 		#DEBUG
 		for service in self.services.getServices():
 			for server in service.getServers():
 				print "STATUS:",server.getStatus()
 		#FINDEBUG
-		index += 1
 
 	def eventBeat(self):
 		for service in self.services:
