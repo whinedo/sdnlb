@@ -12,7 +12,6 @@ from services import Services
 from services_proxy import ServicesProxy
 
 
-#MyManager.register('proxy_services',,proxytype=Services)
     
 class RRlb(DynamicPolicy):
 	def __init__(self,switch,ip):
@@ -28,8 +27,7 @@ class RRlb(DynamicPolicy):
 		self.ip = ip
 		
 
-		#Q = packets(limit=1,group_by=['srcip'])
-		Q = packets(limit=1,group_by=['srcip','srcport'])
+		Q = packets(limit=1,group_by=['srcip','srcport','dstport'])
 
 		Q.register_callback(self.round_robin)
 		self.policy = Q
@@ -38,11 +36,6 @@ class RRlb(DynamicPolicy):
 		self.hb = HeartBeat(sdnlb_conf.switch_ip,services_proxy)
 		self.hb.start()
 
-		#self.policy = flood() + self.policy
-
-		#DEBUG
-		#self.server = self.services.getService(0).getServer(0)
-		#FINDEBUG
 
 	def genHbRules(self):
 
@@ -66,11 +59,11 @@ class RRlb(DynamicPolicy):
 
 		dst_srv_rl = None
 
-		dst_srv_rl = match(srcip=pkt['srcip'], dstip=IPAddr(ip),dstport=ports[0], ethtype=packet.IPV4, protocol=packet.TCP_PROTO)
+		dst_srv_rl = match(srcip=pkt['srcip'], srcport=pkt['srcport'],dstip=IPAddr(ip),dstport=ports[0], ethtype=packet.IPV4, protocol=packet.TCP_PROTO)
 		
 		if (len(ports) > 1):	
 			for i in range(1,len(ports)):
-				dst_srv_rl |= match(srcip=pkt['srcip'], dstip=IPAddr(ip),dstport=ports[i], ethtype=packet.IPV4, protocol=packet.TCP_PROTO)
+				dst_srv_rl |= match(srcip=pkt['srcip'], srcport=pkt['srcport'], dstip=IPAddr(ip),dstport=ports[i], ethtype=packet.IPV4, protocol=packet.TCP_PROTO)
 			
 		return dst_srv_rl
 
@@ -95,18 +88,32 @@ class RRlb(DynamicPolicy):
 			else:
 				service.incrementLastSrv()
 
+
+		serviceIdx = self.services.getServiceIndex(service.getLbPort())
+		self.services.setService(serviceIdx,service)
+
+		#DEBUG
+		print "round_robin"
+		service = self.services.getService(serviceIdx)
+		print "service last srv after set:",service.getLastSrv()
+		#FINDEBUG
+
 		return server
 
-		
+        def connecionForwardRules(self,pkt):
+                #forward every packet with destination port not used by load balancing
+                forwardRules = match(srcip=pkt['srcip'], srcport=pkt['srcport'],dstip=pkt['dstip'],dstport=pkt['dstport'], ethtype=packet.IPV4, protocol=packet.TCP_PROTO) | \
+                             match(srcip=pkt['dstip'], srcport=pkt['dstport'],dstip=pkt['srcip'],dstport=pkt['srcport'], ethtype=packet.IPV4, protocol=packet.TCP_PROTO)
+                return forwardRules
 
+                
 	def round_robin(self,pkt):
 
-		print "round_robin"
-		print str(pkt)
-		print str(pkt['switch'])
-		print str(pkt['ethtype'])
-		print str(pkt['dstport'])
-
+		#DEBUG
+		print "-----------------------------"
+		print "PACKET:",pkt
+		print "-----------------------------"
+		#FINDEBUG
 
 		other_switches = ~match(switch=self.switch)
 
@@ -124,38 +131,52 @@ class RRlb(DynamicPolicy):
 			ips = self.services.getServiceIps(dstPort)
 	
 			serviceIndex = self.services.getServiceIndex(dstPort)
-			
-			print "service index:",serviceIndex	
-	
-			service = self.services.getService(serviceIndex)
-	
-			server = self.round_robin_algo(service)
-		
-			if server != None:
-	
-				print ".............."
-				print server
-				print "service index:",serviceIndex	
-				print ".............."
-		
-				#i = 1
 
-				port = pkt['dstport']
-				dst_srv = match(srcip=pkt['srcip'], dstip=IPAddr(self.ip),dstport=port, ethtype=packet.IPV4, protocol=packet.TCP_PROTO)
+			if serviceIndex != -1:
 				
+				#DEBUG
+				print "service index:",serviceIndex	
+				#FINDEBUG
+	
+				service = self.services.getService(serviceIndex)
+	
+				server = self.round_robin_algo(service)
 			
-				srvs_src = match(srcip=server.getIp(), dstip=pkt['srcip'],dstport=pkt['srcport'])
+				if server != None:
+	
+					print ".............."
+					print server
+					print "service index:",serviceIndex	
+					print ".............."
+			
+					#i = 1
+
+					port = pkt['dstport']
+					dst_srv = match(srcip=pkt['srcip'], dstip=IPAddr(self.ip),dstport=port, ethtype=packet.IPV4, protocol=packet.TCP_PROTO)
+					
+				
+					srvs_src = match(srcip=server.getIp(), dstip=pkt['srcip'],dstport=pkt['srcport'])
+			
+					other_switches = ~match(switch=self.switch)
+					dst_srv = self.genDstSrv(ports,self.ip,pkt)
+					hb_rl = self.genHbRules()
+			
+					self.policy = if_(other_switches, identity, \
+								if_(dst_srv, modify(dstip=server.getIp(),dstmac=server.getMac()), \
+									if_(srvs_src, modify(srcip=IPAddr('10.0.0.2'),srcmac=EthAddr("00:00:00:00:00:02")), \
+										self.policy)))
+
+					print self.policy
+
+			else:
+				#DEBUG
+				print "SHITTTTTTT"
+				#FINDEBUG
+                                forwardRules = self.connecionForwardRules(pkt)
+
+		        	self.policy = if_(forwardRules, identity,self.policy)
+                                print self.policy
 		
-				other_switches = ~match(switch=self.switch)
-				dst_srv = self.genDstSrv(ports,self.ip,pkt)
-				hb_rl = self.genHbRules()
-		
-				self.policy = if_(other_switches, identity, \
-							if_(dst_srv, modify(dstip=server.getIp(),dstmac=server.getMac()), \
-								if_(srvs_src, modify(srcip=IPAddr('10.0.0.2'),srcmac=EthAddr("00:00:00:00:00:02")), \
-									self.policy)))
-		
-		print self.policy
 	
 		
 def staticFilterTcp():

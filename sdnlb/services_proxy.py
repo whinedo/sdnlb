@@ -23,3 +23,7 @@ class ServicesProxy(BaseProxy):
 
 	def getServiceIps(self,lbPort):
 		return self._callmethod('getServiceIps', [lbPort])
+
+
+	def setService(self,index,service):
+		return self._callmethod('setService', [index,service])

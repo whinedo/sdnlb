@@ -24,9 +24,9 @@ class Service (object):
 		if (index < (len(self.servers)) and index >= 0):
 		 	self.servers[index] = server
 
-		print "index",index
-		print self.servers[index].printAll()
-		print self.servers[index].getStatus()
+		#print "index",index
+		#print self.servers[index].printAll()
+		#print self.servers[index].getStatus()
                 
 	
 	def getLastSrv(self):
@@ -37,3 +37,4 @@ class Service (object):
 
 	def incrementLastSrv(self):
 		self.last_srv = (self.last_srv + 1) % len(self.servers)
+		print "LAST SRV incremented:",self.last_srv

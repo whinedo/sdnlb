@@ -33,6 +33,11 @@ class Services(object):
 		else:
 		 	return self.services[index]
 
+	def setService(self,index,service):
+		if (index < (len(self.services)) and index >= 0):
+			self.services[index] = service
+			
+
 	def getServiceIndex(self,lbPort):
 		for i in range(len(self.services)):
 			service = self.services[i]
