@@ -3,6 +3,21 @@ class Service (object):
 		self.last_srv = -1
 		self.lbPort = lbPort
 		self.servers = []
+		self.maxWeight = 0
+
+	def initializeServers(self):
+		for server in self.servers:
+			weight = server.getWeight()
+			try:
+				server.setData(weight/float(self.maxWeight))
+			except ZeroDivisionError,e:
+			 	pass
+
+	def setMaxWeight(self):
+		for server in self.servers:
+			weight = server.getWeight()
+			if weight > 0 and weight > self.maxWeight:
+				self.maxWeight = weight
 	
 	def getServers(self):
 		return self.servers
@@ -27,7 +42,7 @@ class Service (object):
 		#print "index",index
 		#print self.servers[index].printAll()
 		#print self.servers[index].getStatus()
-                
+
 	
 	def getLastSrv(self):
 		return self.last_srv

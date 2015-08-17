@@ -7,6 +7,7 @@ class Server (object):
 		self.eventPort = int(eventPort)
 		self.status = status
 		self.weight = int(weight)
+		self.data = None
 		self.connections = -1
 		self.cpu = -1
 
@@ -35,6 +36,12 @@ class Server (object):
 
 	def setPort(self,port):
 		self.port = port
+
+	def getData(self):
+		return self.data
+
+	def setData(self,data):
+		self.data = data
 
 	def getEventPort(self):
 		return self.eventPort

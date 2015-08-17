@@ -8,12 +8,12 @@ from utils_packet import *
 import sdnlb_conf
 from heartbeat import HeartBeat 
 from mymanager import MyManager
-from services import Services
+#from services import Services
 from services_proxy import ServicesProxy
-
+from lb_algorithms import LBAlgorithms
 
     
-class RRlb(DynamicPolicy):
+class LoadBalancer(DynamicPolicy):
 	def __init__(self,switch,ip):
 		super(RRlb, self).__init__()
 
@@ -29,12 +29,14 @@ class RRlb(DynamicPolicy):
 
 		Q = packets(limit=1,group_by=['srcip','srcport','dstport'])
 
-		Q.register_callback(self.round_robin)
+		Q.register_callback(self.loadBalancing)
 		self.policy = Q
 
 
 		self.hb = HeartBeat(sdnlb_conf.switch_ip,services_proxy)
 		self.hb.start()
+
+		self.services.initializeServers()
 
 
 	def genHbRules(self):
@@ -67,38 +69,38 @@ class RRlb(DynamicPolicy):
 			
 		return dst_srv_rl
 
-	def round_robin_algo(self,service):
-
-		service.incrementLastSrv()
-		servers = service.getServers()
-		server = None
-
-		for i in range(len(servers)):
-			server_aux = service.getServer(service.getLastSrv())
-			print "------------------------"
-			print "SERVICE LAST SRV:",service.getLastSrv()
-			print "STATUS:",server_aux.getStatus()
-			print "------------------------"
-			if (server_aux.getStatus() == True):
-				server = server_aux
-				print "------------------------"
-				print "SERVER FOUND"
-				print "------------------------"
-				break
-			else:
-				service.incrementLastSrv()
-
-
-		serviceIdx = self.services.getServiceIndex(service.getLbPort())
-		self.services.setService(serviceIdx,service)
-
-		#DEBUG
-		print "round_robin"
-		service = self.services.getService(serviceIdx)
-		print "service last srv after set:",service.getLastSrv()
-		#FINDEBUG
-
-		return server
+#	def round_robin_algo(self,service):
+#
+#		service.incrementLastSrv()
+#		servers = service.getServers()
+#		server = None
+#
+#		for i in range(len(servers)):
+#			server_aux = service.getServer(service.getLastSrv())
+#			print "------------------------"
+#			print "SERVICE LAST SRV:",service.getLastSrv()
+#			print "STATUS:",server_aux.getStatus()
+#			print "------------------------"
+#			if (server_aux.getStatus() == True):
+#				server = server_aux
+#				print "------------------------"
+#				print "SERVER FOUND"
+#				print "------------------------"
+#				break
+#			else:
+#				service.incrementLastSrv()
+#
+#
+#		serviceIdx = self.services.getServiceIndex(service.getLbPort())
+#		self.services.setService(serviceIdx,service)
+#
+#		#DEBUG
+#		print "round_robin"
+#		service = self.services.getService(serviceIdx)
+#		print "service last srv after set:",service.getLastSrv()
+#		#FINDEBUG
+#
+#		return server
 
         def connecionForwardRules(self,pkt):
                 #forward every packet with destination port not used by load balancing
@@ -107,7 +109,7 @@ class RRlb(DynamicPolicy):
                 return forwardRules
 
                 
-	def round_robin(self,pkt):
+	def loadBalancing(self,pkt):
 
 		#DEBUG
 		print "-----------------------------"
@@ -140,7 +142,8 @@ class RRlb(DynamicPolicy):
 	
 				service = self.services.getService(serviceIndex)
 	
-				server = self.round_robin_algo(service)
+				#server = self.round_robin_algo(service)
+				server = LBAlgorithms.round_robin_algo(service)
 			
 				if server != None:
 	
@@ -190,7 +193,7 @@ def setup_services():
 def main():
 
 
-	rrlb_sdn = RRlb(sdnlb_conf.switch,sdnlb_conf.sip)
+	rrlb_sdn = LoadBalancer(sdnlb_conf.switch,sdnlb_conf.sip)
 
 	forwardARP = match(ethtype=0x0806)
 	forwardICMP = match(ethtype=0x0800,protocol=1)
