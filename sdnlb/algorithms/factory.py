@@ -1,0 +1,18 @@
+from ilbagorithm import LBAlgorithm
+from round_robin import RoundRobin
+from weight_round_robin import WeightRoundRobin
+
+class AlgoFactory(object):
+
+        @staticmethod
+        def getAlgoInstance(type):
+            algo = None
+            if type == "round":
+                algo = RoundRobin()
+            elif type == "weight":
+                algo = WeightRoundRobin()
+    
+            if algo == None:
+                algo = RoundRobin()
+    
+            return algo

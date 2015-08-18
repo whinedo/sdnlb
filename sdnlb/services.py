@@ -25,7 +25,6 @@ class Services(object):
 				service.setServer(index,server)	
 
 	def initializeServers(self):
-		for service in self.ervices:
 		for i in range(len(self.services)):
 			service = self.services[i]
 			service.initializeServers()

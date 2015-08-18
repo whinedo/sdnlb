@@ -1,10 +1,8 @@
-from services_proxy import ServicesProxy
+from ilbagorithm import LBAlgorithm
+import random
 
-class LBAlgorithms(object):
-
-	@staticmethod
-	def round_robin_algo(services,service):
-
+class WeightRoundRobin(LBAlgorithm):
+	def getServer(self,services,service):
 		service.incrementLastSrv()
 		servers = service.getServers()
 		server = None
@@ -16,11 +14,15 @@ class LBAlgorithms(object):
 			print "STATUS:",server_aux.getStatus()
 			print "------------------------"
 			if (server_aux.getStatus() == True):
-				server = server_aux
-				print "------------------------"
-				print "SERVER FOUND"
-				print "------------------------"
-				break
+				r = random.random()
+				ci = float(server.getData())
+				
+				if (r <= ci):
+					server = server_aux
+					print "------------------------"
+					print "SERVER FOUND"
+					print "------------------------"
+					break
 			else:
 				service.incrementLastSrv()
 
@@ -36,13 +38,4 @@ class LBAlgorithms(object):
 		#FINDEBUG
 
 		return server
-
-	@staticmethod
-	def weight_round_robin_algo(services.service):
-
-		service.incrementLastSrv()
-		servers = service.getServers()
-		server = None
-
-
 

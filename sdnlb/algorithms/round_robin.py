@@ -1,10 +1,7 @@
-from services_proxy import ServicesProxy
+from ilbagorithm import LBAlgorithm
 
-class LBAlgorithms(object):
-
-	@staticmethod
-	def round_robin_algo(services,service):
-
+class RoundRobin(LBAlgorithm):
+	def getServer(self,services,service):
 		service.incrementLastSrv()
 		servers = service.getServers()
 		server = None
@@ -36,13 +33,4 @@ class LBAlgorithms(object):
 		#FINDEBUG
 
 		return server
-
-	@staticmethod
-	def weight_round_robin_algo(services.service):
-
-		service.incrementLastSrv()
-		servers = service.getServers()
-		server = None
-
-
 

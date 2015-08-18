@@ -10,12 +10,15 @@ from heartbeat import HeartBeat
 from mymanager import MyManager
 #from services import Services
 from services_proxy import ServicesProxy
-from lb_algorithms import LBAlgorithms
+#from lb_algorithms import LBAlgorithms
+from algorithms.factory import AlgoFactory
 
     
 class LoadBalancer(DynamicPolicy):
-	def __init__(self,switch,ip):
-		super(RRlb, self).__init__()
+	def __init__(self,switch,ip,algo):
+		super(LoadBalancer, self).__init__()
+
+                self.algo = algo
 
 		manager = MyManager()
 		manager.register('setup_services',setup_services,proxytype=ServicesProxy)
@@ -143,7 +146,7 @@ class LoadBalancer(DynamicPolicy):
 				service = self.services.getService(serviceIndex)
 	
 				#server = self.round_robin_algo(service)
-				server = LBAlgorithms.round_robin_algo(service)
+				server = self.algo.getServer(service)
 			
 				if server != None:
 	
@@ -192,8 +195,10 @@ def setup_services():
     
 def main():
 
+	algoType = sdnlb_conf.algo
+	algo = AlgoFactory.getAlgoInstance(algoType)
 
-	rrlb_sdn = LoadBalancer(sdnlb_conf.switch,sdnlb_conf.sip)
+	rrlb_sdn = LoadBalancer(sdnlb_conf.switch,sdnlb_conf.sip,algo)
 
 	forwardARP = match(ethtype=0x0806)
 	forwardICMP = match(ethtype=0x0800,protocol=1)
