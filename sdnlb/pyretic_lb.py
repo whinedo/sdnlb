@@ -1,4 +1,3 @@
-from parser import Parser
 from pyretic.core import packet
 from pyretic.lib.corelib import *
 from pyretic.lib.query import *
@@ -6,16 +5,17 @@ from pyretic.lib.std import *
 from pyretic.modules.mac_learner import mac_learner
 from utils_packet import *
 import sdnlb_conf
-from heartbeat import HeartBeat 
-from mymanager import MyManager
+from heartbeat.heartbeat import HeartBeat 
+from data_structures.parser import Parser
+from data_structures.mymanager import MyManager
 #from services import Services
-from services_proxy import ServicesProxy
+from data_structures.services_proxy import ServicesProxy
 #from lb_algorithms import LBAlgorithms
 from algorithms.factory import AlgoFactory
 
     
 class LoadBalancer(DynamicPolicy):
-	def __init__(self,switch,ip,algo):
+	def __init__(self,switch,ip,mac,algo):
 		super(LoadBalancer, self).__init__()
 
                 self.algo = algo
@@ -28,6 +28,7 @@ class LoadBalancer(DynamicPolicy):
 		self.services = services_proxy
 		self.switch = switch
 		self.ip = ip
+                self.mac = mac
 		
 
 		Q = packets(limit=1,group_by=['srcip','srcport','dstport'])
@@ -72,38 +73,6 @@ class LoadBalancer(DynamicPolicy):
 			
 		return dst_srv_rl
 
-#	def round_robin_algo(self,service):
-#
-#		service.incrementLastSrv()
-#		servers = service.getServers()
-#		server = None
-#
-#		for i in range(len(servers)):
-#			server_aux = service.getServer(service.getLastSrv())
-#			print "------------------------"
-#			print "SERVICE LAST SRV:",service.getLastSrv()
-#			print "STATUS:",server_aux.getStatus()
-#			print "------------------------"
-#			if (server_aux.getStatus() == True):
-#				server = server_aux
-#				print "------------------------"
-#				print "SERVER FOUND"
-#				print "------------------------"
-#				break
-#			else:
-#				service.incrementLastSrv()
-#
-#
-#		serviceIdx = self.services.getServiceIndex(service.getLbPort())
-#		self.services.setService(serviceIdx,service)
-#
-#		#DEBUG
-#		print "round_robin"
-#		service = self.services.getService(serviceIdx)
-#		print "service last srv after set:",service.getLastSrv()
-#		#FINDEBUG
-#
-#		return server
 
         def connecionForwardRules(self,pkt):
                 #forward every packet with destination port not used by load balancing
@@ -146,7 +115,9 @@ class LoadBalancer(DynamicPolicy):
 				service = self.services.getService(serviceIndex)
 	
 				#server = self.round_robin_algo(service)
-				server = self.algo.getServer(service)
+                                if self.services != None:
+                                    print "------------aaaaaaaa----------aaaaaaa-------"
+				server = self.algo.getServer(self.services,service)
 			
 				if server != None:
 	
@@ -169,9 +140,12 @@ class LoadBalancer(DynamicPolicy):
 			
 					self.policy = if_(other_switches, identity, \
 								if_(dst_srv, modify(dstip=server.getIp(),dstmac=server.getMac()), \
-									if_(srvs_src, modify(srcip=IPAddr('10.0.0.2'),srcmac=EthAddr("00:00:00:00:00:02")), \
+									#if_(srvs_src, modify(srcip=IPAddr('10.0.0.2'),srcmac=EthAddr("00:00:00:00:00:02")), \
+									if_(srvs_src, modify(srcip=IPAddr(self.ip),srcmac=EthAddr(self.mac)), \
 										self.policy)))
-
+                                        server.incrementConnections()
+                                        self.services.setServer(service.getLbPort(),server,ip=server.getIp())
+                                        # update server because connections attribute has been modified
 					print self.policy
 
 			else:
@@ -198,7 +172,7 @@ def main():
 	algoType = sdnlb_conf.algo
 	algo = AlgoFactory.getAlgoInstance(algoType)
 
-	rrlb_sdn = LoadBalancer(sdnlb_conf.switch,sdnlb_conf.sip,algo)
+	rrlb_sdn = LoadBalancer(sdnlb_conf.switch,sdnlb_conf.sip,sdnlb_conf.smac,algo)
 
 	forwardARP = match(ethtype=0x0806)
 	forwardICMP = match(ethtype=0x0800,protocol=1)

@@ -10,9 +10,8 @@ from mininet.log import setLogLevel, info
 from mininet.link import TCLink, Intf
 from subprocess import call
 
-import sdnlb_conf
 
-def myNetwork():
+def CpuLimitedTopology(switch_ip,switch_mac):
 
     net = Mininet( topo=None,
                    build=False,
@@ -33,8 +32,8 @@ def myNetwork():
 
     h1 = net.addHost('h1', cls=Host, ip='10.0.0.1',mac='00:00:00:00:00:01' ,defaultRoute=None) 
     h2 = net.addHost('h2', cls=Host, ip='10.0.0.2',mac='00:00:00:00:00:02' ,defaultRoute=None)
-    h4 = net.addHost('h4', cls=Host, ip='10.0.0.4',mac='00:00:00:00:00:04' ,defaultRoute=None) 
-    h3 = net.addHost('h3', cls=Host, ip='10.0.0.3',mac='00:00:00:00:00:03' ,defaultRoute=None)
+    h4 = net.addHost('h4', cls=Host, ip='10.0.0.4',mac='00:00:00:00:00:04' ,defaultRoute=None,cpu=0.25) # means weight = 1
+    h3 = net.addHost('h3', cls=Host, ip='10.0.0.3',mac='00:00:00:00:00:03' ,defaultRoute=None,cpu=0.5)  # means weight = 2
 
     info( '*** Add links\n')
     net.addLink(h2, s2)
@@ -55,8 +54,9 @@ def myNetwork():
 
     info( '*** Post configure switches and hosts\n')
 
-    sip = sdnlb_conf.switch_ip
-    s2.cmd('ifconfig s2 %s'%(sip))
+    sip = switch_ip
+    smac = switch_mac
+    s2.cmd('ifconfig s2 %s hw ether %s'%(sip,smac))
 
     CLI(net)
     net.stop()

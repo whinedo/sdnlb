@@ -7,10 +7,15 @@ class AlgoFactory(object):
         @staticmethod
         def getAlgoInstance(type):
             algo = None
+
             if type == "round":
                 algo = RoundRobin()
             elif type == "weight":
                 algo = WeightRoundRobin()
+            elif type == "connections":
+                algo = LeastConnections()
+            elif type == "cpu":
+                algo = LeastLoad()
     
             if algo == None:
                 algo = RoundRobin()

@@ -49,7 +49,7 @@ class HeartBeat (object):
 				finally:
 					socket.close()
 
-				self.services.setServer(lbPort,index,server)
+				self.services.setServer(lbPort,server,index=index)
 				index += 1
 
 		#DEBUG
@@ -60,12 +60,38 @@ class HeartBeat (object):
 
 	def eventBeat(self):
 		for service in self.services:
+			index = 0
+			lbPort = service.getLbPort()
 			for server in service.getServers():
 				socket = Socket()
 
 				try:
 					socket.connect(server.getIp(),server.getEventPort())
-					socket.send(JsonMessage.genLoadMessage())
-				except Exception,e:
+					msg = socket.recv()
+					
+					if msg != '':
+						(msgtype, data) = JsonMessage.parse_json(msg)
+
+						if cpu in data:
+							server.setCpu(data['cpu'])
+
+						if conns in data:
+							server.setCpu(data['conns'])
+                                except Exception,e:
 					# cannot connect with server
-					server.setStatus(False)
+					#print e
+					#print "STATUS DOWN"
+					pass
+				finally:
+					socket.close()
+
+				self.services.setServer(lbPort,index,server)
+				index += 1
+
+		#DEBUG
+		for service in self.services.getServices():
+			for server in service.getServers():
+				print "STATUS:",server.getStatus()
+				print "CPU:",server.getCpu()
+				print "CONNS:",server.getConnections()
+		#FINDEBUG

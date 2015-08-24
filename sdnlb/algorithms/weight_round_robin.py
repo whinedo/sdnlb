@@ -32,7 +32,7 @@ class WeightRoundRobin(LBAlgorithm):
 		services.setService(serviceIdx,service)
 
 		#DEBUG
-		print "round_robin"
+		print "weight_round_robin"
 		service = self.services.getService(serviceIdx)
 		print "service last srv after set:",service.getLastSrv()
 		#FINDEBUG

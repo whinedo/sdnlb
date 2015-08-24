@@ -28,7 +28,7 @@ class RoundRobin(LBAlgorithm):
 
 		#DEBUG
 		print "round_robin"
-		service = self.services.getService(serviceIdx)
+		service = services.getService(serviceIdx)
 		print "service last srv after set:",service.getLastSrv()
 		#FINDEBUG
 
