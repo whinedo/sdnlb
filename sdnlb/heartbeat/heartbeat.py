@@ -58,35 +58,44 @@ class HeartBeat (object):
 				print "STATUS:",server.getStatus()
 		#FINDEBUG
 
+        def eventBeatWorker(self,lbPort,server)
+	    socket = Socket()
+
+	    try:
+	    	socket.connect(server.getIp(),server.getEventPort())
+	    	msg = socket.recv()
+	    	
+	    	if msg != '':
+	    		(msgtype, data) = JsonMessage.parse_json(msg)
+
+	    		if cpu in data:
+	    			server.setCpu(data['cpu'])
+
+	    		if conns in data:
+	    			server.setCpu(data['conns'])
+            except Exception,e:
+	    	# cannot connect with server
+	    	#print e
+	    	#print "STATUS DOWN"
+                server.setStatus(False)
+	    finally:
+	    	socket.close()
+
+	    self.services.setServer(lbPort,index,server)
+
 	def eventBeat(self):
 		for service in self.services:
 			index = 0
 			lbPort = service.getLbPort()
+                        processes = []
 			for server in service.getServers():
-				socket = Socket()
+                                p = Process(target=self.eventBeatWorker, args=(lbPort, server))
+                                p.start()
+                                processes.append(p)
+			        index += 1
 
-				try:
-					socket.connect(server.getIp(),server.getEventPort())
-					msg = socket.recv()
-					
-					if msg != '':
-						(msgtype, data) = JsonMessage.parse_json(msg)
-
-						if cpu in data:
-							server.setCpu(data['cpu'])
-
-						if conns in data:
-							server.setCpu(data['conns'])
-                                except Exception,e:
-					# cannot connect with server
-					#print e
-					#print "STATUS DOWN"
-					pass
-				finally:
-					socket.close()
-
-				self.services.setServer(lbPort,index,server)
-				index += 1
+                        for p in processes:
+                                p.join()
 
 		#DEBUG
 		for service in self.services.getServices():
