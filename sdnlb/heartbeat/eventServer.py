@@ -31,7 +31,7 @@ class Server (object):
 			self.logger.debug("Started process %r", process)
 
 
-	def getConnections(self,port,data):
+	def getConnections(self,port):
 		cmd = "netstat -anp | grep %s | grep ESTABLISHED | wc -l"%port
 		connRe = re.compile('\d+$')
 	
@@ -56,25 +56,12 @@ class Server (object):
 			logger.debug("Connected %r at %r", connection, address)
 	
 			while True:
-				data = connection.recv(1024)
 	
-				if data == "":
-					logger.debug("Socket closed remotely")
-					break
-	
-	
-			
-				data = data.replace("\r","")
-				data = data.replace("\n","")
+                                cpuLoad = self.getCpuLoad()
+                                connections = self.getConnections(port)
+                    
+                                answer = json_message.genLoadMessage(cpuLoad,connections)
 
-				logger.debug("Received data %r", data)
-	
-				if data == "connections":
-					answer = self.getConnections(port,data)
-				elif data == "cpu":
-					answer = self.getCpuLoad()
-				else:
-					answer = "\n"
 	
 				connection.sendall(answer)
 		except:
