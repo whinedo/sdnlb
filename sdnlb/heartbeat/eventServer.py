@@ -31,7 +31,7 @@ class Server (object):
 			self.logger.debug("Started process %r", process)
 
 
-	def getConnections(port,data):
+	def getConnections(self,port,data):
 		cmd = "netstat -anp | grep %s | grep ESTABLISHED | wc -l"%port
 		connRe = re.compile('\d+$')
 	
@@ -44,10 +44,10 @@ class Server (object):
 	
 		return str(res)
 	
-	def getCpuLoad():
+	def getCpuLoad(self):
 		return str(psutil.cpu_percent())
 	
-	def handle (connection, address,port):
+	def handle (self,connection, address,port):
 		logging.basicConfig(level=logging.DEBUG)
 		logger = logging.getLogger("process-%r" % (address,))
 		answer = ""
@@ -62,11 +62,12 @@ class Server (object):
 					logger.debug("Socket closed remotely")
 					break
 	
-				logger.debug("Received data %r", data)
 	
 			
 				data = data.replace("\r","")
 				data = data.replace("\n","")
+
+				logger.debug("Received data %r", data)
 	
 				if data == "connections":
 					answer = self.getConnections(port,data)
