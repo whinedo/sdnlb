@@ -13,9 +13,9 @@ class WeightRoundRobin(LBAlgorithm):
 			print "SERVICE LAST SRV:",service.getLastSrv()
 			print "STATUS:",server_aux.getStatus()
 			print "------------------------"
-			if (server_aux.getStatus() == True):
+			if (server_aux.getStatus() == True and server_aux.getData() != None):
 				r = random.random()
-				ci = float(server.getData())
+				ci = float(server_aux.getData())
 				
 				if (r <= ci):
 					server = server_aux
@@ -23,6 +23,8 @@ class WeightRoundRobin(LBAlgorithm):
 					print "SERVER FOUND"
 					print "------------------------"
 					break
+		        	else:
+		        		service.incrementLastSrv()
 			else:
 				service.incrementLastSrv()
 
@@ -33,7 +35,7 @@ class WeightRoundRobin(LBAlgorithm):
 
 		#DEBUG
 		print "weight_round_robin"
-		service = self.services.getService(serviceIdx)
+		service = services.getService(serviceIdx)
 		print "service last srv after set:",service.getLastSrv()
 		#FINDEBUG
 

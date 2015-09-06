@@ -63,5 +63,5 @@ def CpuLimitedTopology(switch_ip,switch_mac):
 
 if __name__ == '__main__':
     setLogLevel( 'info' )
-    myNetwork()
+    CpuLimitedTopology()
 

@@ -7,4 +7,4 @@ switch_mac = "00:00:00:00:00:64"
 smac = "00:00:00:00:00:02"
 sip = "10.0.0.2"
 hb_timeout = 60
-algo = "round"
+algo = "weight"

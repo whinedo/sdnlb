@@ -58,7 +58,7 @@ class HeartBeat (object):
 				print "STATUS:",server.getStatus()
 		#FINDEBUG
 
-        def eventBeatWorker(self,lbPort,server)
+        def eventBeatWorker(self,lbPort,server):
 	    socket = Socket()
 
 	    try:

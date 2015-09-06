@@ -6,10 +6,11 @@ class Service (object):
 		self.maxWeight = 0
 
 	def initializeServers(self):
+                self.setMaxWeight()
 		for server in self.servers:
 			weight = server.getWeight()
 			try:
-				server.setData(weight/float(self.maxWeight))
+				server.setData(float(weight)/float(self.maxWeight))
 			except ZeroDivisionError,e:
 			 	pass
 

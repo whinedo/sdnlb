@@ -32,8 +32,8 @@ def SimpleTopology(switch_ip,switch_mac):
 
     h1 = net.addHost('h1', cls=Host, ip='10.0.0.1',mac='00:00:00:00:00:01' ,defaultRoute=None) 
     h2 = net.addHost('h2', cls=Host, ip='10.0.0.2',mac='00:00:00:00:00:02' ,defaultRoute=None)
-    h4 = net.addHost('h4', cls=Host, ip='10.0.0.4',mac='00:00:00:00:00:04' ,defaultRoute=None) 
     h3 = net.addHost('h3', cls=Host, ip='10.0.0.3',mac='00:00:00:00:00:03' ,defaultRoute=None)
+    h4 = net.addHost('h4', cls=Host, ip='10.0.0.4',mac='00:00:00:00:00:04' ,defaultRoute=None) 
 
     info( '*** Add links\n')
     net.addLink(h2, s2)
