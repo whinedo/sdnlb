@@ -87,8 +87,9 @@ class Server (object):
 		 
 if __name__ == "__main__":
 	logging.basicConfig(level=logging.DEBUG)
-	port = int(sys.argv[1])
-	server = Server("localhost", port)
+	ip = sys.argv[1]
+	port = int(sys.argv[2])
+	server = Server(ip, port)
 
 	try:
 		server.start()
