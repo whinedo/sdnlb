@@ -37,7 +37,7 @@ class LoadBalancer(DynamicPolicy):
 		self.policy = Q
 
 
-		self.hb = HeartBeat(sdnlb_conf.switch_ip,services_proxy)
+		self.hb = HeartBeat(sdnlb_conf.switch_ip,services_proxy,sdnlb_conf.event)
 		self.hb.start()
 
 		self.services.initializeServers()

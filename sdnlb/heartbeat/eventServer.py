@@ -2,7 +2,7 @@
 import multiprocessing
 import time
 import socket
-from json_message import JsonMessage
+import json_message
 import logging
 import sys,re
 import commands
@@ -62,6 +62,7 @@ class Server (object):
                     
                                 answer = json_message.genLoadMessage(cpuLoad,connections)
 
+                                print "answer:",answer
 	
 				connection.sendall(answer)
 		except:

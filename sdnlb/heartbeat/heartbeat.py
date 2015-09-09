@@ -58,9 +58,8 @@ class HeartBeat (object):
 				print "STATUS:",server.getStatus()
 		#FINDEBUG
 
-        def eventBeatWorker(self,lbPort,server):
-	    socket = Socket()
-
+        def eventBeatWorker(self,lbPort,server,index):
+	    socket = SocketConnection()
 	    try:
 	    	socket.connect(server.getIp(),server.getEventPort())
 	    	msg = socket.recv()
@@ -68,11 +67,15 @@ class HeartBeat (object):
 	    	if msg != '':
 	    		(msgtype, data) = JsonMessage.parse_json(msg)
 
+                        print "data:",data
+
 	    		if cpu in data:
 	    			server.setCpu(data['cpu'])
 
 	    		if conns in data:
 	    			server.setCpu(data['conns'])
+
+                        print data
             except Exception,e:
 	    	# cannot connect with server
 	    	#print e
@@ -84,12 +87,12 @@ class HeartBeat (object):
 	    self.services.setServer(lbPort,index,server)
 
 	def eventBeat(self):
-		for service in self.services:
+		for service in self.services.getServices():
 			index = 0
-			lbPort = service.getLbPort()
                         processes = []
 			for server in service.getServers():
-                                p = Process(target=self.eventBeatWorker, args=(lbPort, server))
+         			eventPort = server.getEventPort()
+                                p = Process(target=self.eventBeatWorker, args=(service.getLbPort(),server,index))
                                 p.start()
                                 processes.append(p)
 			        index += 1
