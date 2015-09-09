@@ -2,7 +2,7 @@
 import multiprocessing
 import time
 import socket
-import json_message
+from json_message import JsonMessage
 import logging
 import sys,re
 import commands
@@ -55,20 +55,20 @@ class Server (object):
 		try:
 			logger.debug("Connected %r at %r", connection, address)
 	
-			while True:
 	
-                                cpuLoad = self.getCpuLoad()
-                                connections = self.getConnections(port)
+                        cpuLoad = self.getCpuLoad()
+                        connections = self.getConnections(port)
                     
-                                answer = json_message.genLoadMessage(cpuLoad,connections)
+                        answer = JsonMessage.genLoadMessage(cpuLoad,connections)
 
-                                print "answer:",answer
+                        print "answer:",answer
 	
-				connection.sendall(answer)
+			connection.sendall(answer)
 		except:
 			logger.exception("Problem handling request")
 		finally:
 			logger.debug("Closing socket")
+                        connection.shutdown()
 			connection.close()
 
 	
