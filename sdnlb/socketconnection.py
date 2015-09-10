@@ -15,6 +15,9 @@ class SocketConnection (object):
 	
 	def close(self):
 		self.sock.close()
+
+        def shutdown(self):
+		self.sock.shutdown()
 	
 	def send(self, msg):
 		totalsent = 0

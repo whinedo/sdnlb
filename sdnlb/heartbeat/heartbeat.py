@@ -61,7 +61,8 @@ class HeartBeat (object):
         def eventBeatWorker(self,lbPort,server,index):
 	    socket = SocketConnection()
 	    try:
-	    	socket.connect(server.getIp(),server.getEventPort())
+                print "CONNNNECTIONG %s %d"%(server.getIp(),int(server.getEventPort()))
+	    	socket.connect(server.getIp(),int(server.getEventPort()))
 	    	msg = socket.recv()
 	    	
 	    	if msg != '':
@@ -76,9 +77,11 @@ class HeartBeat (object):
 	    			server.setCpu(data['conns'])
 
                         print data
+                else:
+                    print "NOOOOOOOOOOOOOTHING"
             except Exception,e:
 	    	# cannot connect with server
-	    	#print e
+	    	print e
 	    	#print "STATUS DOWN"
                 server.setStatus(False)
 	    finally:

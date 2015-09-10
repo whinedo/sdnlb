@@ -58,7 +58,7 @@ def CpuLimitedTopology(switch_ip,switch_mac):
     smac = switch_mac
     s2.cmd('ifconfig s2 %s hw ether %s'%(sip,smac))
 
-    CLI(net)
+    cli = CLI(net)
     net.stop()
 
 if __name__ == '__main__':

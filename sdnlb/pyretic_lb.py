@@ -115,8 +115,7 @@ class LoadBalancer(DynamicPolicy):
 				service = self.services.getService(serviceIndex)
 	
 				#server = self.round_robin_algo(service)
-                                if self.services != None:
-                                    print "------------aaaaaaaa----------aaaaaaa-------"
+
 				server = self.algo.getServer(self.services,service)
 			
 				if server != None:
