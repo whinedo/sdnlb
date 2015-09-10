@@ -17,7 +17,7 @@ class SocketConnection (object):
 		self.sock.close()
 
         def shutdown(self):
-		self.sock.shutdown()
+		self.sock.shutdown(socket.SHUT_RDWR)
 	
 	def send(self, msg):
 		totalsent = 0
