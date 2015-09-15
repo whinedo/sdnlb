@@ -62,7 +62,7 @@ class HeartBeat (object):
 	    socket = SocketConnection()
 	    try:
                 print "CONNNNECTIONG %s %d"%(server.getIp(),int(server.getEventPort()))
-	    	socket.connect(server.getIp(),int(server.getEventPort()))
+	    	socket.connect(server.getIp(),int(server.getEventPort()),10)
 	    	msg = socket.recv()
 	    	
 	    	if msg != '':

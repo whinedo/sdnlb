@@ -10,7 +10,10 @@ class SocketConnection (object):
 		else:
 			self.sock = sock
 	
-	def connect(self, host, port):
+	def connect(self, host, port,timeout=None):
+		if timeout != None:
+			self.sock.settimeout(timeout)
+
 		self.sock.connect((host, port))
 	
 	def close(self):

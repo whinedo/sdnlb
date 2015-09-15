@@ -105,12 +105,12 @@ class LoadBalancer(DynamicPolicy):
 			ips = self.services.getServiceIps(dstPort)
 	
 			serviceIndex = self.services.getServiceIndex(dstPort)
+			#DEBUG
+			print "service index:",serviceIndex	
+			#FINDEBUG
 
 			if serviceIndex != -1:
 				
-				#DEBUG
-				print "service index:",serviceIndex	
-				#FINDEBUG
 	
 				service = self.services.getService(serviceIndex)
 	
