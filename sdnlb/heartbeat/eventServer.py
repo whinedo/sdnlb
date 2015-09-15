@@ -68,7 +68,7 @@ class Server (object):
 			logger.exception("Problem handling request")
 		finally:
 			logger.debug("Closing socket")
-                        connection.shutdown()
+                        connection.shutdown(socket.SHUT_RDWR)
 			connection.close()
 
 	
