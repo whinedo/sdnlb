@@ -21,6 +21,9 @@ class ServicesProxy(BaseProxy):
 		elif ip != None:
 			return self._callmethod('setServerByIP', [lbPort,ip,server])
 
+	def getServer(self,lbPort,index):
+		return self._callmethod('getServer', [lbPort,index])
+
 	def getPorts(self):
 		return self._callmethod('getPorts')
 

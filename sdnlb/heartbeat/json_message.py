@@ -41,5 +41,12 @@ class JsonMessage (object):
 		msgtype = event_msg['event_type']
 		data = event_msg['data']
 
+		#DEBUG
+		print "DATA in JSON:"
+		print "JSON:"
+		print json_msg
+		print "DATA:"
+		print data
+		#FINDEBUG
 		return (msgtype, data)
 

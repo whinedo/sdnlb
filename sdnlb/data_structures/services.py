@@ -24,6 +24,19 @@ class Services(object):
 			else:
 				service.setServer(index,server)	
 
+	def getServer(self,lbPort,index):
+
+		srvIdx = self.getServiceIndex(lbPort)
+
+		if srvIdx != -1:
+			service = self.getService(srvIdx)
+
+			if (index > (len(service.getServers())-1) or index < 0):
+				return None
+
+			else:
+				return service.getServer(index)	
+
 	def setServerByIP(self,lbPort,ip,server):
 		srvIdx = self.getServiceIndex(lbPort)
 

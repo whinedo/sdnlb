@@ -59,6 +59,10 @@ class LoadBalancer(DynamicPolicy):
 				else:
 					hb_rl |= match(srcip=IPAddr(self.hb.getIp()), dstip=IPAddr(server.getIp()),dstport=server.getPort(), ethtype=packet.IPV4, protocol=packet.TCP_PROTO) | match(srcip=IPAddr(server.getIp()), dstip=IPAddr(self.hb.getIp()),srcport=server.getPort(), ethtype=packet.IPV4, protocol=packet.TCP_PROTO)
 
+				if (server.getEventPort() != None):
+					hb_rl |= match(srcip=IPAddr(self.hb.getIp()), dstip=IPAddr(server.getIp()),dstport=server.getEventPort(), ethtype=packet.IPV4, protocol=packet.TCP_PROTO) | match(srcip=IPAddr(server.getIp()), dstip=IPAddr(self.hb.getIp()),srcport=server.getEventPort(), ethtype=packet.IPV4, protocol=packet.TCP_PROTO)
+
+
 		return hb_rl
 
 	def genDstSrv(self,ports,ip,pkt):
@@ -95,7 +99,8 @@ class LoadBalancer(DynamicPolicy):
 			hb_rl = self.genHbRules()
 			self.policy = if_(other_switches, identity, \
 				if_(hb_rl, identity, self.policy))
-
+                        print "HB RULE"
+			print self.policy
 		else:
 	
 			ports = self.services.getPorts()

@@ -58,44 +58,13 @@ class HeartBeat (object):
 				print "STATUS:",server.getStatus()
 		#FINDEBUG
 
-        def eventBeatWorker(self,lbPort,server,index):
-	    socket = SocketConnection()
-	    try:
-                print "CONNNNECTIONG %s %d"%(server.getIp(),int(server.getEventPort()))
-	    	socket.connect(server.getIp(),int(server.getEventPort()),10)
-	    	msg = socket.recv()
-	    	
-	    	if msg != '':
-	    		(msgtype, data) = JsonMessage.parse_json(msg)
-
-                        print "data:",data
-
-	    		if cpu in data:
-	    			server.setCpu(data['cpu'])
-
-	    		if conns in data:
-	    			server.setCpu(data['conns'])
-
-                        print data
-                else:
-                    print "NOOOOOOOOOOOOOTHING"
-            except Exception,e:
-	    	# cannot connect with server
-	    	print e
-	    	#print "STATUS DOWN"
-                server.setStatus(False)
-	    finally:
-	    	socket.close()
-
-	    self.services.setServer(lbPort,index,server)
-
 	def eventBeat(self):
 		for service in self.services.getServices():
 			index = 0
                         processes = []
 			for server in service.getServers():
          			eventPort = server.getEventPort()
-                                p = Process(target=self.eventBeatWorker, args=(service.getLbPort(),server,index))
+                                p = Process(target=self.eventBeatWorker, args=(service.getLbPort(),eventPort,self.services,index))
                                 p.start()
                                 processes.append(p)
 			        index += 1
@@ -110,3 +79,36 @@ class HeartBeat (object):
 				print "CPU:",server.getCpu()
 				print "CONNS:",server.getConnections()
 		#FINDEBUG
+
+        def eventBeatWorker(self,lbPort,eventPort,services,index):
+            server = services.getServer(lbPort,index)
+	    socket = SocketConnection()
+	    try:
+	    	socket.connect(server.getIp(),int(eventPort),15)
+	    	msg = socket.receive()
+	    	
+	    	if msg != '':
+	    		(msgtype, data) = JsonMessage.parse_json(msg)
+
+	    		
+                        if 'value' in data.keys():
+                                value = data['value']
+
+	    	        	if 'cpu' in value.keys():
+	    	        		server.setCpu(float(value['cpu']))
+
+	    	        	if 'conns' in value.keys():
+	    	        		server.setConnections(int(value['conns']))
+
+
+            except Exception,e:
+	    	# cannot connect with server
+                #print "Exception"
+	    	#print e
+	    	#print "STATUS DOWN"
+                server.setStatus(False)
+	    finally:
+	    	socket.close()
+
+	    services.setServer(lbPort,server,index=index)
+

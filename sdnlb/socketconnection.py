@@ -1,6 +1,8 @@
 import socket
 import sdnlb_conf
 
+MSGLEN = 2048
+
 class SocketConnection (object):
 
 	def __init__(self, sock=None):
@@ -12,6 +14,9 @@ class SocketConnection (object):
 	
 	def connect(self, host, port,timeout=None):
 		if timeout != None:
+			#DEBUG
+			print "setting socket timeout:%d"%timeout
+			#FINDEBUG
 			self.sock.settimeout(timeout)
 
 		self.sock.connect((host, port))
@@ -25,7 +30,7 @@ class SocketConnection (object):
 	def send(self, msg):
 		totalsent = 0
 		
-		while totalsent < MSGLEN:
+		while totalsent < msg.len():
 			sent = self.sock.send(msg[totalsent:])
 			if sent == 0:
 				raise RuntimeError("socket connection broken")
@@ -34,13 +39,12 @@ class SocketConnection (object):
 	def receive(self):
 	
 		chunks = []
-		bytesRecv = 0
+		closed = False
 	
-		while bytes_recd < MSGLEN:
-			chunk = self.sock.recv(min(MSGLEN - bytes_recd, 2048))
+		while not closed:
+			chunk = self.sock.recv(2048)
 			if chunk == '':
-				raise RuntimeError("socket connection broken")
+				closed = True
 			chunks.append(chunk)
-			bytesRecv = bytesRecv + len(chunk)
 	
 		return ''.join(chunks)
