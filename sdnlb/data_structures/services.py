@@ -1,3 +1,4 @@
+from sets import Set
 from service import Service
 
 class Services(object):
@@ -88,6 +89,15 @@ class Services(object):
 
 		for service in self.services:
 			ports.append(int(service.getLbPort()))
+
+		return ports
+
+
+	def getEventPorts(self):
+		ports = Set()
+
+		for service in self.services:
+			ports.update(service.getEventPorts())
 
 		return ports
 

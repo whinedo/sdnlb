@@ -94,8 +94,14 @@ class LoadBalancer(DynamicPolicy):
 		#FINDEBUG
 
 		other_switches = ~match(switch=self.switch)
+                lbPorts = self.services.getPorts()
+                eventPorts = self.services.getEventPorts()
 
-		if (str(pkt['srcip']) == self.hb.getIp() or str(pkt['dstip']) == self.hb.getIp()):
+
+		if (str(pkt['srcip']) == self.hb.getIp() or str(pkt['dstip']) == self.hb.getIp()) and 
+                 ((pkt['srcport'] in lbPorts or pkt['srcport'] in eventPorts)) or ((pkt['dstport'] in lbPorts or pkt['dstport'] in eventPorts)) ):
+                        # if connection is established from/to load balancer
+
 			hb_rl = self.genHbRules()
 			self.policy = if_(other_switches, identity, \
 				if_(hb_rl, identity, self.policy))

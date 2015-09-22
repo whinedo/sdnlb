@@ -1,3 +1,5 @@
+from sets import Set
+
 class Service (object):
 	def __init__(self,lbPort):
 		self.last_srv = -1
@@ -50,6 +52,14 @@ class Service (object):
 
 	def getLbPort(self):
 		return self.lbPort
+
+        def getEventPorts(self):
+                portsSet = Set()
+
+                for server in self.servers:
+                    eventPort = server.getEventPort()
+                    portsSet.add(eventPort)
+                return portsSet
 
 	def incrementLastSrv(self):
 		self.last_srv = (self.last_srv + 1) % len(self.servers)
