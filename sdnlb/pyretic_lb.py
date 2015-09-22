@@ -42,6 +42,7 @@ class LoadBalancer(DynamicPolicy):
 
 		self.services.initializeServers()
 
+		self.hb_rl = self.genHbRules()
 
 	def genHbRules(self):
 
@@ -97,14 +98,12 @@ class LoadBalancer(DynamicPolicy):
                 lbPorts = self.services.getPorts()
                 eventPorts = self.services.getEventPorts()
 
-
-		if (str(pkt['srcip']) == self.hb.getIp() or str(pkt['dstip']) == self.hb.getIp()) and 
-                 ((pkt['srcport'] in lbPorts or pkt['srcport'] in eventPorts)) or ((pkt['dstport'] in lbPorts or pkt['dstport'] in eventPorts)) ):
+		if (str(pkt['srcip']) == self.hb.getIp() or str(pkt['dstip']) == self.hb.getIp()) and (((pkt['srcport'] in lbPorts or pkt['srcport'] in eventPorts)) or ((pkt['dstport'] in lbPorts or pkt['dstport'] in eventPorts)) ):
                         # if connection is established from/to load balancer
 
-			hb_rl = self.genHbRules()
 			self.policy = if_(other_switches, identity, \
-				if_(hb_rl, identity, self.policy))
+				if_(self.hb_rl, identity, self.policy))
+
                         print "HB RULE"
 			print self.policy
 		else:
@@ -146,7 +145,6 @@ class LoadBalancer(DynamicPolicy):
 			
 					other_switches = ~match(switch=self.switch)
 					dst_srv = self.genDstSrv(ports,self.ip,pkt)
-					hb_rl = self.genHbRules()
 			
 					self.policy = if_(other_switches, identity, \
 								if_(dst_srv, modify(dstip=server.getIp(),dstmac=server.getMac()), \

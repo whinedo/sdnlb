@@ -27,7 +27,7 @@ class ServicesProxy(BaseProxy):
 	def getPorts(self):
 		return self._callmethod('getPorts')
 
-	def getPorts(self):
+	def getEventPorts(self):
 		return self._callmethod('getEventPorts')
 
 	def getServiceIps(self,lbPort):
