@@ -2,11 +2,12 @@
 import multiprocessing
 import time
 import socket
-from json_message import JsonMessage
+from json_message import *
 import logging
 import sys,re
-import commands
+import subprocess
 import psutil
+import sdnlb_conf
 
  
 class Server (object):
@@ -32,10 +33,12 @@ class Server (object):
 
 
 	def getConnections(self,port):
-		cmd = "netstat -anp | grep %s | grep ESTABLISHED | wc -l"%port
+                cmd = "netstat"
+		args = "-anp | grep %s | grep ESTABLISHED | wc -l"%port
 		connRe = re.compile('\d+$')
 	
-		status,output = commands.getstatusoutput(cmd)
+                status = 0
+                output = subprocess.check_output([cmd, args])
 		res = 0
 	
 		for line in output:
@@ -46,6 +49,13 @@ class Server (object):
 	
 	def getCpuLoad(self):
 		return str(psutil.cpu_percent())
+
+	def runIperf(self,port):
+                cmd = "iperf"
+		args = " -s -p %d "%(port+1)
+                status = 0
+                output = subprocess.check_output([cmd, args])
+		return status
 	
 	def handle (self,connection, address,port):
 		logging.basicConfig(level=logging.DEBUG)
@@ -54,16 +64,22 @@ class Server (object):
 	
 		try:
 			logger.debug("Connected %r at %r", connection, address)
-	
-	
-                        cpuLoad = self.getCpuLoad()
-                        connections = self.getConnections(port)
-                    
-                        answer = JsonMessage.genLoadMessage(cpuLoad,connections)
+	    		msg = connection.recv(2048)
+                        #DEBUG
+                        print "MSG:",msg
+                        #FINDEBUG
+			
+	    		(msgtype, data) = JsonMessage.parse_json(msg)
 
-                        print "answer:",answer
-	
-			connection.sendall(answer)
+			if(msgtype == msgTypes['cmd_req']):
+					if data['cmd'] == "iperf":
+						port = port+1
+						answer = JsonMessage.genCmdAnsMessage("iperf",str(port))
+						self.runIperf(port)
+
+	                if (len(answer)>0):
+			    connection.sendall(answer)
+                        # kill iperf process- This must be done with a new command req : for kill iperf
 		except:
 			logger.exception("Problem handling request")
 		finally:

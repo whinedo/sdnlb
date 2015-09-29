@@ -1,6 +1,10 @@
 import json
 
 #eventTypes = {'lb': 0}
+msgTypes = {'cmd_req': 0,
+            'cmd_ans':1,
+	      'info' : 2}
+
 eventTypes = {'status': 0,
 	      'load' : 1}
 
@@ -34,12 +38,28 @@ class JsonMessage (object):
 		return json.dumps(data)
 
 	@staticmethod
+	def genCmdReqMessage(command):
+                msgType = msgTypes['cmd_req']
+
+                data = dict(msgtype=msgType,data=dict(cmd=command))
+
+		return json.dumps(data)
+
+	@staticmethod
+	def genCmdAnsMessage(command,arguments):
+                msgType = msgTypes['cmd_ans']
+
+                data = dict(msgtype=msgType,data=dict(cmd=command,args=arguments))
+
+		return json.dumps(data)
+
+
+	@staticmethod
 	def parse_json(msg):
 		json_msg = json.loads(msg)
 		
-		event_msg = json_msg['event']
-		msgtype = event_msg['event_type']
-		data = event_msg['data']
+		msgtype = json_msg['msgtype']
+		data = json_msg['data']
 
 		#DEBUG
 		print "DATA in JSON:"

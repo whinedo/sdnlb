@@ -1,7 +1,8 @@
 from multiprocessing import Process
 import time
+import commands
 from socketconnection import SocketConnection
-from json_message import JsonMessage
+from json_message import *
 import sdnlb_conf
 
 class HeartBeat (object):
@@ -85,20 +86,29 @@ class HeartBeat (object):
 	    socket = SocketConnection()
 	    try:
 	    	socket.connect(server.getIp(),int(eventPort),15)
+		cmd = "iperf"
+		msg = JsonMessage.genCmdReqMessage(cmd)
+		socket.send(msg)
 	    	msg = socket.receive()
 	    	
 	    	if msg != '':
 	    		(msgtype, data) = JsonMessage.parse_json(msg)
+			
+			if (msgtype == msgTypes['cmd_ans']):
+				if (data['cmd'] == "iperf"):
+					port = int(data['args'])
+					time.sleep(2) # wait for iperf to start running	
+					cmd = "iperf -yc -t %d -c %s -p %d"%(sdnl_conf.iperf_tout,server.getIp(),port)
+					status,output = commands.getstatusoutput(cmd)
+				
+                 #       if 'value' in data.keys():
+                 #               value = data['value']
 
-	    		
-                        if 'value' in data.keys():
-                                value = data['value']
+	    	 #       	if 'cpu' in value.keys():
+	    	 #       		server.setCpu(float(value['cpu']))
 
-	    	        	if 'cpu' in value.keys():
-	    	        		server.setCpu(float(value['cpu']))
-
-	    	        	if 'conns' in value.keys():
-	    	        		server.setConnections(int(value['conns']))
+	    	 #       	if 'conns' in value.keys():
+	    	 #       		server.setConnections(int(value['conns']))
 
 
             except Exception,e:

@@ -1,17 +1,45 @@
 from heartbeat import HeartBeat
-from parser import Parser
 import time
+from data_structures.services_proxy import ServicesProxy
+from data_structures.parser import Parser
+from socketconnection import SocketConnection
+from json_message import *
+import sdnlb_conf
+import subprocess
 
 def main():
 
-	parser = Parser('/home/mininet/sdnlb/sdnlb/servers.conf')
-	services = parser.parse()
-	hb = HeartBeat(services)
-	hb.start()
+    ip = "127.0.0.1"
+    eventPort = 9000
 
-	while True:
-		time.sleep(20)
+    socket = SocketConnection()
+    try:
+    	socket.connect(ip,int(eventPort),30)
+	cmd = "iperf"
+	msg = JsonMessage.genCmdReqMessage(cmd)
+	socket.send(msg)
+    	msg = socket.receive()
+    	
+    	if msg != '':
+    		(msgtype, data) = JsonMessage.parse_json(msg)
+		
+		if (msgtype == msgTypes['cmd_ans']):
+			if (data['cmd'] == "iperf"):
+				port = int(data['args'])
+				time.sleep(2) # wait for iperf to start running	
+				cmd = "iperf"
+				args = "-yc -t %d -c %s -p %d"%(sdnlb_conf.iperf_tout,ip,port)
+                		status = 0
+                		output = subprocess.check_output([cmd, args])
+			
+    except Exception,e:
+    	# cannot connect with server
+        print "Exception"
+    	print e
+    	#print "STATUS DOWN"
+    finally:
+    	socket.close()
 
-
+	
 if __name__ == "__main__":
 	main()

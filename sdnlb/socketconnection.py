@@ -30,7 +30,8 @@ class SocketConnection (object):
 	def send(self, msg):
 		totalsent = 0
 		
-		while totalsent < msg.len():
+		while totalsent < len(msg):
+			print msg[totalsent:]
 			sent = self.sock.send(msg[totalsent:])
 			if sent == 0:
 				raise RuntimeError("socket connection broken")

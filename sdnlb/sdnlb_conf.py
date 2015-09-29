@@ -9,3 +9,4 @@ sip = "10.0.0.2"
 hb_timeout = 60
 algo = "weight"
 event=True
+iperf_tout = 10 #iperf test timeout
