@@ -53,7 +53,11 @@ class JsonMessage (object):
 
 		return json.dumps(data)
 
-
+	@staticmethod
+	def parse_iperf_json(msg):
+		json_msg = json.loads(msg)
+		return json_msg
+		
 	@staticmethod
 	def parse_json(msg):
 		json_msg = json.loads(msg)

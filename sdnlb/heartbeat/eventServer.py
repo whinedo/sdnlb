@@ -51,10 +51,11 @@ class Server (object):
 		return str(psutil.cpu_percent())
 
 	def runIperf(self,port):
-                cmd = "iperf"
-		args = " -s -p %d "%(port+1)
+                cmd = "iperf3"
+                args = "-s"
+		opts = "-p %d &"%(port)
                 status = 0
-                output = subprocess.check_output([cmd, args])
+                output = subprocess.check_output([cmd, args,opts])
 		return status
 	
 	def handle (self,connection, address,port):
@@ -75,10 +76,9 @@ class Server (object):
 					if data['cmd'] == "iperf":
 						port = port+1
 						answer = JsonMessage.genCmdAnsMessage("iperf",str(port))
+			    			connection.sendall(answer)
 						self.runIperf(port)
 
-	                if (len(answer)>0):
-			    connection.sendall(answer)
                         # kill iperf process- This must be done with a new command req : for kill iperf
 		except:
 			logger.exception("Problem handling request")

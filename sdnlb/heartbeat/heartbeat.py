@@ -85,7 +85,7 @@ class HeartBeat (object):
             server = services.getServer(lbPort,index)
 	    socket = SocketConnection()
 	    try:
-	    	socket.connect(server.getIp(),int(eventPort),15)
+	    	socket.connect(server.getIp(),int(eventPort),30)
 		cmd = "iperf"
 		msg = JsonMessage.genCmdReqMessage(cmd)
 		socket.send(msg)
@@ -98,9 +98,13 @@ class HeartBeat (object):
 				if (data['cmd'] == "iperf"):
 					port = int(data['args'])
 					time.sleep(2) # wait for iperf to start running	
-					cmd = "iperf -yc -t %d -c %s -p %d"%(sdnl_conf.iperf_tout,server.getIp(),port)
-					status,output = commands.getstatusoutput(cmd)
+                                        cmd = "iperf"
+                                        args = "-c"
+					opts = "%s -t %d -p %d -J"%(ip,int(sdnlb_conf.iperf_tout),int(port))
+                		        status = 0
+                		        output = subprocess.check_output([cmd, args,opts])
 				
+		                	json_msg = JsonMessage.parse_iperf_json
                  #       if 'value' in data.keys():
                  #               value = data['value']
 
