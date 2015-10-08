@@ -51,24 +51,25 @@ class Server (object):
 		return str(psutil.cpu_percent())
 
 	def runIperf(self,port):
-                cmd = "iperf3"
-                args = "-s"
-		opts = "-p %d &"%(port)
+                timeout = 3 * int(sdnlb_conf.iperf_tout)
+                cmd = "timeout"
+                args = "%d"%timeout
+		cmd2 = "iperf3"
+		args2 = "-s" 
+		opts = "-p %d"%(port)
                 status = 0
-                output = subprocess.check_output([cmd, args,opts])
+                subprocess.call([cmd, args,cmd2,args2,opts])
 		return status
-	
+
 	def handle (self,connection, address,port):
 		logging.basicConfig(level=logging.DEBUG)
 		logger = logging.getLogger("process-%r" % (address,))
 		answer = ""
 	
 		try:
-			logger.debug("Connected %r at %r", connection, address)
+			logger.debug("Event server: client connected %r at %r", connection, address)
 	    		msg = connection.recv(2048)
-                        #DEBUG
-                        print "MSG:",msg
-                        #FINDEBUG
+			logger.debug("Event server: received:%s", msg)
 			
 	    		(msgtype, data) = JsonMessage.parse_json(msg)
 
@@ -77,6 +78,7 @@ class Server (object):
 						port = port+1
 						answer = JsonMessage.genCmdAnsMessage("iperf",str(port))
 			    			connection.sendall(answer)
+						logger.debug("Event server: sent:%s", answer)
 						self.runIperf(port)
 
                         # kill iperf process- This must be done with a new command req : for kill iperf

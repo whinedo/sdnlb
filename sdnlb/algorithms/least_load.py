@@ -13,13 +13,8 @@ class LeastLoad(LBAlgorithm):
 				print "SERVICE LAST SRV:",service.getLastSrv()
 				print "STATUS:",server_aux.getStatus()
 				print "------------------------"
-				if (server_aux.getStatus() == True):
-					server = server_aux
-					print "------------------------"
-					print "SERVER FOUND"
-					print "------------------------"
-					break
-
+				server = server_aux
+				
 		# service must be set again by services proxy in order to be updated in Manager
 #		serviceIdx = services.getServiceIndex(service.getLbPort())
 #		services.setService(serviceIdx,service)
@@ -34,14 +29,14 @@ class LeastLoad(LBAlgorithm):
 
 
 	def getLeastCpuLoadServer(self,service):
-		minCpu = 0
+		minCpu = servers[0].getCpu()
 		servers = service.getServers()
 		index = None
 
 		for i in range(len(servers)):
 			server = servers[i]
 
-			if (server.getCpu() <= minCpu):
+			if (server.getCpu() <= minCpu and server.getStatus() == True):
 				index = i
 				break
 

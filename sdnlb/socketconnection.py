@@ -38,14 +38,8 @@ class SocketConnection (object):
 			totalsent = totalsent + sent
 	
 	def receive(self):
+		msg = self.sock.recv(2048)
+		if msg == '':
+			msg = None
 	
-		chunks = []
-		closed = False
-	
-		while not closed:
-			chunk = self.sock.recv(2048)
-			if chunk == '':
-				closed = True
-			chunks.append(chunk)
-	
-		return ''.join(chunks)
+		return msg

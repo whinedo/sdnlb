@@ -5,19 +5,23 @@ from data_structures.parser import Parser
 from socketconnection import SocketConnection
 from json_message import *
 import sdnlb_conf
-import subprocess
+from subprocess import Popen, PIPE, STDOUT
+import logging
 
 def main():
 
     ip = "127.0.0.1"
     eventPort = 9000
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger("hb")
 
     socket = SocketConnection()
     try:
-    	socket.connect(ip,int(eventPort),60)
+	socket.connect(ip,int(eventPort),10)
 	cmd = "iperf"
 	msg = JsonMessage.genCmdReqMessage(cmd)
 	socket.send(msg)
+	logger.debug("HB : sent:%s",msg)
     	msg = socket.receive()
     	
     	if msg != '':
@@ -27,22 +31,21 @@ def main():
 		if (msgtype == msgTypes['cmd_ans']):
 			if (data['cmd'] == "iperf"):
 				port = int(data['args'])
-				time.sleep(2) # wait for iperf to start running	
-				cmd = "iperf3"
-                                args = "-c %s"%(ip)
-				opts = "-t %d -p %d -J"%(int(sdnlb_conf.iperf_tout),int(port))
-                		status = 0
-                		output = subprocess.check_output([cmd, args,opts])
-                                print output
+				time.sleep(4) # wait for iperf to start running	
+                                cmd = 'iperf3 -c %s -t %d -p %d -J'%(ip,int(sdnlb_conf.iperf_tout),int(port))
+
+                                p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+                                output = p.stdout.read()
+
                                 
-		                json_msg = JsonMessage.parse_iperf_json
-                                print json_msg['start']
+                                print output
+
+		                json_msg = JsonMessage.parse_iperf_json(output)
+                                print json_msg['end']['cpu_utilization_percent']['remote_system']
 			
     except Exception,e:
-    	# cannot connect with server
         print "Exception"
     	print e
-    	#print "STATUS DOWN"
     finally:
     	socket.close()
 

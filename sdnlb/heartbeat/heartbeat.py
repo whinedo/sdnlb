@@ -3,6 +3,7 @@ import time
 import commands
 from socketconnection import SocketConnection
 from json_message import *
+from subprocess import Popen, PIPE, STDOUT
 import sdnlb_conf
 
 class HeartBeat (object):
@@ -85,7 +86,8 @@ class HeartBeat (object):
             server = services.getServer(lbPort,index)
 	    socket = SocketConnection()
 	    try:
-	    	socket.connect(server.getIp(),int(eventPort),30)
+	    	#socket.connect(server.getIp(),int(eventPort),30)
+	    	socket.connect(server.getIp(),int(eventPort),int(sdnlb_conf.iperf_tout)*3)
 		cmd = "iperf"
 		msg = JsonMessage.genCmdReqMessage(cmd)
 		socket.send(msg)
@@ -97,23 +99,17 @@ class HeartBeat (object):
 			if (msgtype == msgTypes['cmd_ans']):
 				if (data['cmd'] == "iperf"):
 					port = int(data['args'])
-					time.sleep(2) # wait for iperf to start running	
-                                        cmd = "iperf"
-                                        args = "-c"
-					opts = "%s -t %d -p %d -J"%(ip,int(sdnlb_conf.iperf_tout),int(port))
-                		        status = 0
-                		        output = subprocess.check_output([cmd, args,opts])
-				
-		                	json_msg = JsonMessage.parse_iperf_json
-                 #       if 'value' in data.keys():
-                 #               value = data['value']
+					time.sleep(4) # wait for iperf to start running	
+					cmd = 'iperf3 -c %s -t %d -p %d -J'%(server.getIp(),int(sdnlb_conf.iperf_tout),int(port))
 
-	    	 #       	if 'cpu' in value.keys():
-	    	 #       		server.setCpu(float(value['cpu']))
-
-	    	 #       	if 'conns' in value.keys():
-	    	 #       		server.setConnections(int(value['conns']))
-
+	                                p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+	                                output = p.stdout.read()
+			                json_msg = JsonMessage.parse_iperf_json(output)
+					if (json_msg['end']['cpu_utilization_percent']['remote_system'] != None):
+						#cpu_load = json_msg['end']['cpu_utilization_percent']['remote_system']
+						cpu_load = json_msg['end']['cpu_utilization_percent']['remote_total']
+                                                print "CPU_LOAD:",cpu_load
+						server.setCpu(cpu_load)
 
             except Exception,e:
 	    	# cannot connect with server
@@ -123,6 +119,6 @@ class HeartBeat (object):
                 server.setStatus(False)
 	    finally:
 	    	socket.close()
-
+            print "%d,%d"%(server.getCpu(),index)
 	    services.setServer(lbPort,server,index=index)
 
