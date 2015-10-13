@@ -8,7 +8,7 @@ class LeastConnections(LBAlgorithm):
 		for i in range(len(servers)):
 			index = self.getLeastConnectionsServer(service)
 			if index != None: 
-				server_aux = service.getServer(service.getLastSrv())
+				server_aux = service.getServer(index)
 				print "------------------------"
 				print "SERVICE LAST SRV:",service.getLastSrv()
 				print "STATUS:",server_aux.getStatus()

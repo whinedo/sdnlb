@@ -61,6 +61,10 @@ class HeartBeat (object):
 		#FINDEBUG
 
 	def eventBeat(self):
+		#DEBUG
+                print "eventBeat"
+		#FINDEBUG
+
 		for service in self.services.getServices():
 			index = 0
                         processes = []
@@ -108,8 +112,10 @@ class HeartBeat (object):
 					if (json_msg['end']['cpu_utilization_percent']['remote_system'] != None):
 						#cpu_load = json_msg['end']['cpu_utilization_percent']['remote_system']
 						cpu_load = json_msg['end']['cpu_utilization_percent']['remote_total']
+						#DEBUG
                                                 print "CPU_LOAD:",cpu_load
-						server.setCpu(cpu_load)
+						#FINDEBUG
+						server.setCpu(float(cpu_load))
 
             except Exception,e:
 	    	# cannot connect with server

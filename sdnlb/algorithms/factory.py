@@ -1,6 +1,7 @@
 from ilbagorithm import LBAlgorithm
 from round_robin import RoundRobin
 from weight_round_robin import WeightRoundRobin
+from least_load import LeastLoad
 
 class AlgoFactory(object):
 

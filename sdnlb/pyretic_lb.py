@@ -12,6 +12,7 @@ from data_structures.mymanager import MyManager
 from data_structures.services_proxy import ServicesProxy
 #from lb_algorithms import LBAlgorithms
 from algorithms.factory import AlgoFactory
+import logging
 
     
 class LoadBalancer(DynamicPolicy):
@@ -19,6 +20,7 @@ class LoadBalancer(DynamicPolicy):
 		super(LoadBalancer, self).__init__()
 
                 self.algo = algo
+                self.logger = logging.getLogger('sdnlblogger')
 
 		manager = MyManager()
 		manager.register('setup_services',setup_services,proxytype=ServicesProxy)
@@ -105,7 +107,7 @@ class LoadBalancer(DynamicPolicy):
 				if_(self.hb_rl, identity, self.policy))
 
                         print "HB RULE"
-			print self.policy
+		#	print self.policy
 		else:
 	
 			ports = self.services.getPorts()
@@ -115,25 +117,23 @@ class LoadBalancer(DynamicPolicy):
 			ips = self.services.getServiceIps(dstPort)
 	
 			serviceIndex = self.services.getServiceIndex(dstPort)
-			#DEBUG
-			print "service index:",serviceIndex	
-			#FINDEBUG
 
 			if serviceIndex != -1:
 				
 	
 				service = self.services.getService(serviceIndex)
 	
-				#server = self.round_robin_algo(service)
 
 				server = self.algo.getServer(self.services,service)
 			
 				if server != None:
 	
+			                #DEBUG
 					print ".............."
-					print server
-					print "service index:",serviceIndex	
+					print server.getIp()
 					print ".............."
+			                #FINDEBUG
+                                        self.logger.info("service index:%d ip:%s port:%d"%(serviceIndex,server.getIp(),server.getPort()))
 			
 					#i = 1
 
@@ -154,16 +154,13 @@ class LoadBalancer(DynamicPolicy):
                                         server.incrementConnections()
                                         self.services.setServer(service.getLbPort(),server,ip=server.getIp())
                                         # update server because connections attribute has been modified
-					print self.policy
+					#print self.policy
 
 			else:
-				#DEBUG
-				print "SHITTTTTTT"
-				#FINDEBUG
                                 forwardRules = self.connecionForwardRules(pkt)
 
 		        	self.policy = if_(forwardRules, identity,self.policy)
-                                print self.policy
+                                #print self.policy
 		
 	
 		
@@ -176,7 +173,8 @@ def setup_services():
 	return services
     
 def main():
-
+        logging.basicConfig(filename='log/sdnlb.log', level=logging.INFO,format='%(asctime)s %(message)s', datefmt='%d/%m/%Y %H:%M:%S %p')
+        logger = logging.getLogger('sdnlblogger')
 	algoType = sdnlb_conf.algo
 	algo = AlgoFactory.getAlgoInstance(algoType)
 
