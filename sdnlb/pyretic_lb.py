@@ -8,9 +8,7 @@ import sdnlb_conf
 from heartbeat.heartbeat import HeartBeat 
 from data_structures.parser import Parser
 from data_structures.mymanager import MyManager
-#from services import Services
 from data_structures.services_proxy import ServicesProxy
-#from lb_algorithms import LBAlgorithms
 from algorithms.factory import AlgoFactory
 import logging
 
@@ -162,7 +160,15 @@ class LoadBalancer(DynamicPolicy):
 		        	self.policy = if_(forwardRules, identity,self.policy)
                                 #print self.policy
 		
-	
+def printConfigInfo(logger):
+        logger.info("######################")
+        logger.info("Load Balancing Configutarion")
+        logger.info("Algorithm:%s"%sdnlb_conf.algo)
+        logger.info("Events active:%s"%sdnlb_conf.event)
+        logger.info("Iperf Timeout:%d"%sdnlb_conf.iperf_tout)
+        logger.info("Maximum connections:%d"%sdnlb_conf.max_conns)
+        logger.info("######################")
+    
 		
 def staticFilterTcp():
 	return if_(match(ethtype=packet.IPV4, protocol=packet.TCP_PROTO),genDynRules(),mac_learner())
@@ -175,6 +181,7 @@ def setup_services():
 def main():
         logging.basicConfig(filename='log/sdnlb.log', level=logging.INFO,format='%(asctime)s %(message)s', datefmt='%d/%m/%Y %H:%M:%S %p')
         logger = logging.getLogger('sdnlblogger')
+        printConfigInfo(logger)
 	algoType = sdnlb_conf.algo
 	algo = AlgoFactory.getAlgoInstance(algoType)
 

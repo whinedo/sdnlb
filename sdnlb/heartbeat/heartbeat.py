@@ -92,10 +92,19 @@ class HeartBeat (object):
 	    try:
 	    	#socket.connect(server.getIp(),int(eventPort),30)
 	    	socket.connect(server.getIp(),int(eventPort),int(sdnlb_conf.iperf_tout)*3)
-		cmd = "iperf"
-		msg = JsonMessage.genCmdReqMessage(cmd)
+                if (sdnlb_conf.algo =="cpu"):
+		        cmd = "iperf"
+			args = []
+                elif (sdnlb_conf.algo == "connections"):
+		        cmd = "netstat"
+			args = [server.getPort()]
+
+		msg = JsonMessage.genCmdReqMessage(cmd,args)
 		socket.send(msg)
 	    	msg = socket.receive()
+                #DEBUG
+                print "HB msg recv:",msg
+                #FINDEBUG
 	    	
 	    	if msg != '':
 	    		(msgtype, data) = JsonMessage.parse_json(msg)
@@ -116,6 +125,15 @@ class HeartBeat (object):
                                                 print "CPU_LOAD:",cpu_load
 						#FINDEBUG
 						server.setCpu(float(cpu_load))
+
+				elif (data['cmd'] == "netstat"):
+					connections = int(data['args'])
+					server.setConnections(int(connections))
+					#DEBUG
+                                        print "EB CONNS:",connections
+					#FINDEBUG
+
+                                    
 
             except Exception,e:
 	    	# cannot connect with server

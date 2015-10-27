@@ -22,6 +22,7 @@ class JsonMessage (object):
 
 
 		return json.dumps(data)
+
 		 
 	@staticmethod
 	def genLoadMessage(cpuLoad,connections):
@@ -29,7 +30,7 @@ class JsonMessage (object):
 
 		data = dict(event=dict(event_type=eventnum,    \
 		                       description=1,   \
-		                       data=dict(data_type='int',     \
+		                       data=dict(data_type='float',     \
 	                      	               value=dict(cpu=cpuLoad,
 			      	  		     conns=connections
 			      	  		     ))         \
@@ -38,10 +39,10 @@ class JsonMessage (object):
 		return json.dumps(data)
 
 	@staticmethod
-	def genCmdReqMessage(command):
+	def genCmdReqMessage(command,arguments):
                 msgType = msgTypes['cmd_req']
 
-                data = dict(msgtype=msgType,data=dict(cmd=command))
+                data = dict(msgtype=msgType,data=dict(cmd=command,args=arguments))
 
 		return json.dumps(data)
 

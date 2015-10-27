@@ -6,6 +6,7 @@ from json_message import *
 import logging
 import sys,re
 import subprocess
+from subprocess import Popen, PIPE, STDOUT
 import psutil
 import sdnlb_conf
 
@@ -13,7 +14,9 @@ import sdnlb_conf
 class Server (object):
 
 	def __init__(self, hostname, port):
-		self.logger = logging.getLogger("server")
+
+                logging.basicConfig(filename='log/event.log', level=logging.INFO,format='%(asctime)s %(message)s', datefmt='%d/%m/%Y %H:%M:%S %p')
+                self.logger = logging.getLogger('event')
 		self.hostname = hostname
 		self.port = port
 	
@@ -33,17 +36,23 @@ class Server (object):
 
 
 	def getConnections(self,port):
-                cmd = "netstat"
-		args = "-anp | grep %s | grep ESTABLISHED | wc -l"%port
+                #cmd = "netstat -anpt | grep %s:%d | grep ESTABLISHED | wc -l"%(ip,port)
+                cmd = "netstat -anpt | grep %d | grep ESTABLISHED | wc -l"%(port)
+                print cmd
 		connRe = re.compile('\d+$')
 	
                 status = 0
-                output = subprocess.check_output([cmd, args])
-		res = 0
+		try:
+			p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+			output = p.stdout.read()
+
+		        for line in output:
+		        	if(connRe.match(line) != None):
+		        		res = int(line)
+		except Exception,e:
+			res = sdnlb_conf.max_conns
+			self.logger.error("Event server: error while executing netstat command:%s", e)
 	
-		for line in output:
-			if(connRe.match(line) != None):
-				res = int(line)/2
 	
 		return str(res)
 	
@@ -80,6 +89,15 @@ class Server (object):
 			    			connection.sendall(answer)
 						logger.debug("Event server: sent:%s", answer)
 						self.runIperf(port)
+
+					elif data['cmd'] == "netstat":
+						(ip,port) = address
+                                                port = int(data['args'][0])
+                                                connections = self.getConnections(port)
+						logger.debug("CONNECTIONS:%s"%connections)
+						answer = JsonMessage.genCmdAnsMessage("netstat",str(connections))
+			    			connection.sendall(answer)
+						logger.debug("Event server: sent:%s", answer)
 
                         # kill iperf process- This must be done with a new command req : for kill iperf
 		except:

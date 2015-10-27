@@ -1,4 +1,6 @@
 from ilbagorithm import LBAlgorithm
+import sdnlb_conf
+
 
 class LeastConnections(LBAlgorithm):
 	def getServer(self,services,service):
@@ -10,16 +12,11 @@ class LeastConnections(LBAlgorithm):
 			if index != None: 
 				server_aux = service.getServer(index)
 				print "------------------------"
-				print "SERVICE LAST SRV:",service.getLastSrv()
+				print "SERVICE MIN CONS SRV:%d ip:%s"%(index,server_aux.getIp())
 				print "STATUS:",server_aux.getStatus()
 				print "------------------------"
-				if (server_aux.getStatus() == True):
-					server = server_aux
-					print "------------------------"
-					print "SERVER FOUND"
-					print "------------------------"
-					break
-
+				server = server_aux
+				
 		# service must be set again by services proxy in order to be updated in Manager
 #		serviceIdx = services.getServiceIndex(service.getLbPort())
 #		services.setService(serviceIdx,service)
@@ -34,17 +31,25 @@ class LeastConnections(LBAlgorithm):
 
 
 	def getLeastConnectionsServer(self,service):
-		minConn = 0
+		minConn = sdnlb_conf.max_conns
 		servers = service.getServers()
 		index = None
 
 		for i in range(len(servers)):
 			server = servers[i]
 
-			if (server.getConnections() <= minConn):
-				index = i
-				break
+                        #DEBUG
+                        print "index:%d CONS:%d"%(i,server.getConnections())
+                        #FINDEBUG
 
+			if (server.getConnections() <= minConn and server.getStatus() == True):
+                                minConn = server.getConnections()
+				index = i
+
+                #DEBUG
+                if index != None:
+                        print "Min index:%d CONS:%d"%(index,servers[index].getConnections())
+                #FINDEBUG
 		return index
 				
 
