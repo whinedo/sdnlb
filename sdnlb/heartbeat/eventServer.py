@@ -16,7 +16,8 @@ class Server (object):
 	def __init__(self, hostname, port):
 
                 logging.basicConfig(filename='log/event.log', level=logging.INFO,format='%(asctime)s %(message)s', datefmt='%d/%m/%Y %H:%M:%S %p')
-                self.logger = logging.getLogger('event')
+                #self.logger = logging.getLogger('event')
+                self.logger = logging.getLogger(__name__)
 		self.hostname = hostname
 		self.port = port
 	
@@ -72,7 +73,8 @@ class Server (object):
 
 	def handle (self,connection, address,port):
 		logging.basicConfig(level=logging.DEBUG)
-		logger = logging.getLogger("process-%r" % (address,))
+		#logger = logging.getLogger("process-%r" % (address,))
+		logger = logging.getLogger(__name__)
 		answer = ""
 	
 		try:

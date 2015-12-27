@@ -18,7 +18,8 @@ class LoadBalancer(DynamicPolicy):
 		super(LoadBalancer, self).__init__()
 
                 self.algo = algo
-                self.logger = logging.getLogger('sdnlblogger')
+                #self.logger = logging.getLogger('sdnlblogger')
+                self.logger = logging.getLogger(__name__)
 
 		manager = MyManager()
 		manager.register('setup_services',setup_services,proxytype=ServicesProxy)
@@ -179,8 +180,12 @@ def setup_services():
 	return services
     
 def main():
-        logging.basicConfig(filename='log/sdnlb.log', level=logging.INFO,format='%(asctime)s %(message)s', datefmt='%d/%m/%Y %H:%M:%S %p')
-        logger = logging.getLogger('sdnlblogger')
+        #logging.basicConfig(filename='log/sdnlb.log', level=logging.INFO,format='%(asctime)s %(message)s', datefmt='%d/%m/%Y %H:%M:%S %p')
+        logging.basicConfig(filename='log/sdnlb.log', level=logging.INFO,format='%(asctime)s %(message)s', datefmt='%d/%m/%Y %H:%M:%S %p',filemode='w')
+        #logger = logging.getLogger('sdnlblogger')
+        #logger = logging.getLogger(__name__)
+        logger = logging.getLogger()
+        logger.info("shit")
         printConfigInfo(logger)
 	algoType = sdnlb_conf.algo
 	algo = AlgoFactory.getAlgoInstance(algoType)
